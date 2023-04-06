@@ -6,18 +6,22 @@ geo_calcs <- function(df){
   
   patients <- subset(df, select=c("patient_id","patient_name","patient_latitude","patient_longitude"))
   
-  facilites <- subset(df, select=c("facility_id","facility_name","facility_latitude","facility_longitude"))
+  #facilites <- subset(df, select=c("facility_id","facility_name","facility_latitude","facility_longitude"))
+  
+  facilities <- 'FILEPATH FOR ORG FILE'
   
   patients <- patients %>%
     rename("latitude" = "patient_latitude",
            "longitude" = "patient_longitude")
   
-  facilites <- facilites %>%
-    rename("latitude" = "facility_latitude",
-           "longitude" = "facility_longitude")
+  facilities <- facilities %>%
+    rename("latitude" = "LAT",
+           "longitude" = "LON",
+           "facility_name" = "NAME",
+           "facility_id" = "Id")
   
   closest_facility <- geo_left_join(patients,
-                                    facilites,
+                                    facilities,
                                     method=c("haversine"),
                                     max_dist=5,
                                     unit=c("km"),

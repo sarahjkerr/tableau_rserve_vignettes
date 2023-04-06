@@ -1,0 +1,39 @@
+library(fuzzyjoin)
+library(readr)
+library(dplyr)
+
+geo_calcs <- function(df){
+  
+  patients <- subset(df, select=c("patient_id","patient_name","patient_latitude","patient_longitude"))
+  
+  facilites <- subset(df, select=c("facility_id","facility_name","facility_latitude","facility_longitude"))
+  
+  patients <- patients %>%
+    rename("latitude" = "patient_latitude",
+           "longitude" = "patient_longitude")
+  
+  facilites <- facilites %>%
+    rename("latitude" = "facility_latitude",
+           "longitude" = "facility_longitude")
+  
+  closest_facility <- geo_left_join(patients,
+                                    facilites,
+                                    method=c("haversine"),
+                                    max_dist=5,
+                                    unit=c("km"),
+                                    distance_col="Geo_Dist")
+  
+  return(data.frame(patient_name = closest_facility$patient_name,
+                    patient_id = closest_facility$patient_id,
+                    facility_name = closest_facility$facility_name,
+                    distance_to_facility = closest_facility$Geo_Dist))
+}
+
+getOutputSchema <- function(){
+  return (data.frame(
+    patient_name = prep_string(),
+    patient_id = prep_string(),
+    facility_name = prep_string(),
+    distance_to_facility = prep_decimal()
+  ))
+}
